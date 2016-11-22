@@ -8,23 +8,39 @@
 
 import UIKit
 
-
-
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     //TEMPORARY ARRAY FOR ID. THIS COULD PROBABLY BE REPLACED
     var idArray = [Int()]
     
-   
+    var toDolist = [Int: String]()
     
-//    var toDictionary: [Int: String] = [1: "Toronto Pearson", 2: "Dublin"]
+    var toDoId: Int?
 
     @IBOutlet weak var tableView: UITableView!
     
+    @IBOutlet weak var enterToDo: UITextField!
+    @IBOutlet weak var toDoButton: UIButton!
+    
+    private let db = DatabaseHelper()
+    
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        
+        if db == nil {
+            print("Error")
+        }
+        
+        
+        // Create a restoration id for the view
+        restorationIdentifier = "ViewController"
+        restorationClass = ViewController.self
     }
+  
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -34,7 +50,17 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     // Return the amount of rows in the database.
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-       return 5
+        var count = Int()
+        
+        do {
+            
+        count = try db!.amountOfRows()!
+            
+        } catch {
+            print(error)
+        }
+
+        return count
     }
     
     
@@ -43,28 +69,96 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! ToDoCell
         
-//        cell.checkLabel.text = idArray[indexPath.row]
-//
-//        if let checkDictionary = toDictionary[idArray[indexPath.row]] {
-//            print (checkDictionary)
-//            cell.toDo.text = checkDictionary
-//        }
-
+        var toDoString = String()
+        
+        do {
+            toDoString = try db!.read(index: indexPath.row)!
+        } catch {
+            print (error)
+        }
+        cell.checkLabel.text = toDoString
         
         return cell
     }
     
-//     When the user deletes a cell, delete data from database.
-     func tableView(_ commitforRowAttableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == UITableViewCellEditingStyle.delete {
-            idArray.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+    // Make rows Editable.
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
+    {
+        return true
+    }
     
-//             Add SQLite code here that deletes data at the given cell.
+    // Enable the user to delete rows.
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
+    {
+        if editingStyle == .delete
+        {
+            do {
+                try db!.delete(index: indexPath.row)
+            } catch {
+                print(error)
+            }
+            
+            self.tableView.reloadData()
         }
     }
     
-
-
+    // insert the contents of the text field in the database and tableviewcontroller
+    @IBAction func insertToDo(_ sender: Any) {
+        
+        if toDoButton.isTouchInside {
+            
+            // Insert textfield into database
+            do {
+                try db!.create(toDo: enterToDo.text!)
+            
+            } catch {
+                print (error)
+            }
+            
+            
+        }
+        
+        // Update tableview
+        DispatchQueue.main.async{
+            self.tableView.reloadData()
+        }
+        
+    }
+    
+    
+    // When the user quits the app encode state.
+    override func encodeRestorableState(with coder: NSCoder) {
+       
+        
+        if let toDoItem = enterToDo.text {
+            coder.encode(toDoItem, forKey: "toDoItem")
+        }
+        
+        super.encodeRestorableState(with: coder)
+    }
+    
+    // When the user opens the app. Decode state.
+    override func decodeRestorableState(with coder: NSCoder) {
+        
+        
+        if let toDoItem = coder.decodeObject(forKey: "toDoItem") as? String {
+            enterToDo.text = toDoItem
+        }
+    
+        
+        super.decodeRestorableState(with: coder)
+    }
+    
+    
 }
+
+// Restore view.
+extension ViewController: UIViewControllerRestoration {
+    static func viewController(withRestorationIdentifierPath identifierComponents: [Any],
+                               coder: NSCoder) -> UIViewController? {
+        let vc = ViewController()
+        return vc
+    }
+}
+
 

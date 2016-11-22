@@ -14,7 +14,7 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ToDoList" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ToDolist" id="BYZ-38-t0r" customClass="ViewController" customModule="ToDoList" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -38,6 +38,9 @@
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dCv-5F-sIc">
                                                 <rect key="frame" x="171.5" y="0.0" width="171.5" height="39"/>
                                                 <state key="normal" title="Button"/>
+                                                <connections>
+                                                    <action selector="insertToDo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="nGX-jB-dp1"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                     </stackView>
@@ -47,6 +50,8 @@
                                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="100" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="abt-66-pgJ">
                                                 <rect key="frame" x="0.0" y="0.0" width="343" height="593"/>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                <color key="separatorColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <color key="sectionIndexBackgroundColor" red="0.99094227040000005" green="1" blue="0.85181043850000004" alpha="1" colorSpace="calibratedRGB"/>
                                                 <prototypes>
                                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" id="x8A-M1-O4R" customClass="ToDoCell" customModule="ToDoList" customModuleProvider="target">
                                                         <rect key="frame" x="0.0" y="28" width="343" height="100"/>
@@ -72,6 +77,10 @@
                                                         </connections>
                                                     </tableViewCell>
                                                 </prototypes>
+                                                <connections>
+                                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="1uI-1k-Brr"/>
+                                                    <outlet property="delegate" destination="BYZ-38-t0r" id="dfo-0E-t6S"/>
+                                                </connections>
                                             </tableView>
                                         </subviews>
                                     </stackView>
@@ -98,7 +107,9 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="enterToDo" destination="M9V-Tc-Xx6" id="ZH3-aP-N8R"/>
                         <outlet property="tableView" destination="abt-66-pgJ" id="JRz-DB-NbN"/>
+                        <outlet property="toDoButton" destination="dCv-5F-sIc" id="1aY-A5-vns"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
