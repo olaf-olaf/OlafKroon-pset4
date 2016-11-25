@@ -9,23 +9,11 @@
 import UIKit
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    
-    //TEMPORARY ARRAY FOR ID. THIS COULD PROBABLY BE REPLACED
-    var idArray = [Int()]
-    
-    var toDolist = [Int: String]()
-    
-    var toDoId: Int?
 
     @IBOutlet weak var tableView: UITableView!
-    
     @IBOutlet weak var enterToDo: UITextField!
     @IBOutlet weak var toDoButton: UIButton!
-    
     private let db = DatabaseHelper()
-    
-    
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,13 +21,45 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         if db == nil {
             print("Error")
+            
         }
         
         
-        // Create a restoration id for the view
-        restorationIdentifier = "ViewController"
-        restorationClass = ViewController.self
+        if(UserDefaults.standard.bool(forKey: "HasLaunchedOnce"))
+        {
+            // app already launched
+        }
+        else
+        {
+            // This is the first launch ever
+            do {
+                try db!.create(toDo: "Welcome to ToDo!")
+                // delete the table view row
+            } catch {
+                print (error)
+            }
+            
+            do {
+                try db!.create(toDo: "Enter something to do and pres Add")
+                // delete the table view row
+            } catch {
+                print (error)
+            }
+            
+            do {
+                try db!.create(toDo: "If you're done, swipe to check off!")
+                // delete the table view row
+            } catch {
+                print (error)
+            }
+            
+            UserDefaults.standard.set(true, forKey: "HasLaunchedOnce")
+            UserDefaults.standard.synchronize()
+        }
+
     }
+    
+    
   
 
     override func didReceiveMemoryWarning() {
@@ -60,7 +80,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             print(error)
         }
 
-        return count
+        return count 
     }
     
     
@@ -81,6 +101,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         return cell
     }
     
+    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+        return "Done!"
+    }
+    
+   
+
     // Make rows Editable.
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
     {
@@ -90,8 +116,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     // Enable the user to delete rows.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
     {
+        
         if editingStyle == .delete
         {
+
             do {
                 try db!.delete(index: indexPath.row)
             } catch {
@@ -102,21 +130,43 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
     }
     
-    // insert the contents of the text field in the database and tableviewcontroller
+      // insert the contents of the text field in the database and tableviewcontroller
     @IBAction func insertToDo(_ sender: Any) {
         
         if toDoButton.isTouchInside {
             
+            
+            if enterToDo.text == "" {
+                
+                // Create the alert controller
+                let alertController = UIAlertController(title: "Enter something to do!", message: "", preferredStyle: .alert)
+                
+                // Create the actions
+                let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default) {
+                    UIAlertAction in
+                    NSLog("OK Pressed")
+                }
+               
+                // Add the actions
+                alertController.addAction(okAction)
+               
+                // Present the controller
+                self.present(alertController, animated: true, completion: nil)
+            } else {
+            
+            
             // Insert textfield into database
             do {
                 try db!.create(toDo: enterToDo.text!)
-            
+                // delete the table view row
             } catch {
                 print (error)
             }
             
-            
+            enterToDo.text = ""
+            }
         }
+        
         
         // Update tableview
         DispatchQueue.main.async{
@@ -128,8 +178,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     // When the user quits the app encode state.
     override func encodeRestorableState(with coder: NSCoder) {
-       
-        
+
         if let toDoItem = enterToDo.text {
             coder.encode(toDoItem, forKey: "toDoItem")
         }
@@ -139,14 +188,14 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     // When the user opens the app. Decode state.
     override func decodeRestorableState(with coder: NSCoder) {
-        
-        
+      
         if let toDoItem = coder.decodeObject(forKey: "toDoItem") as? String {
+            print (toDoItem)
             enterToDo.text = toDoItem
         }
     
-        
         super.decodeRestorableState(with: coder)
+        
     }
     
     

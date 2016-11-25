@@ -10,6 +10,7 @@ import Foundation
 import SQLite
 
 class DatabaseHelper {
+   
     
     private let toDoList = Table("list")
     private let id = Expression<Int>("id")
@@ -53,7 +54,20 @@ class DatabaseHelper {
             throw error
         }
     }
-    
+   
+//   func showTutorial() throws {
+//      for hint in instructions {
+//         let insert = toDoList.insert(self.toDo <- hint)
+//         do {let rowId = try db!.run(insert)
+//            print("ROWID: ", rowId)
+//            
+//         } catch {
+//            throw error
+//         }
+//         
+//      }
+//   }
+   
     // Insert a element into the table.
     func create(toDo: String) throws {
         let insert = toDoList.insert(self.toDo <- toDo)
@@ -61,15 +75,16 @@ class DatabaseHelper {
         do {
             let rowId = try db!.run(insert)
             print("ROWID: ", rowId)
-        } catch{
+        } catch {
             throw error
         }
     }
     
-    func read(index: Int) throws -> String? {
     
+    // Return a toDo with an id that corresponds to the tablerow
+    func read(index: Int) throws -> String? {
     var result: String?
-        var count = 0
+    var count = 0
     
     do {
         
@@ -103,8 +118,8 @@ class DatabaseHelper {
                 
             }
             
-            let alice = toDoList.filter(id == rowId)
-            try db!.run(alice.delete())
+            let location = toDoList.filter(id == rowId)
+            try db!.run(location.delete())
         } catch {
             
             throw error
